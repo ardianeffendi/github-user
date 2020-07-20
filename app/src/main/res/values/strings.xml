@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">GithubUser</string>
+    <string name="item_row_name">Dummy Name</string>
+    <string name="box_container_str">Box Container</string>
+    <string name="item_row_company">Company</string>
+    <string name="item_row_location">A very very veyr long long long location how bout that</string>
+</resources>

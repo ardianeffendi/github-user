@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">GithubUser</string>
+    <string name="item_row_name">Dummy Name</string>
+    <string name="box_container_str">Box Container</string>
+    <string name="search">Search</string>
+    <string name="profile_name_detail">Dummy Name</string>
+    <string name="user_name_detail">Username</string>
+    <string name="arrowToDetail">Arrow</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="followers_tab">Followers</string>
+    <string name="following_tab">Following</string>
+    <string name="company_detail">Company</string>
+    <string name="location_detail">Location</string>
+    <string name="search_hint">Insert a username</string>
+</resources>

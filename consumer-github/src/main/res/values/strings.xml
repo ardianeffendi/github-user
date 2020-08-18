@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">Consumer-Github</string>
+    <string name="item_row_name">Dummy Name</string>
+    <string name="box_container_str">Box Container</string>
+    <string name="search">Search</string>
+    <string name="profile_name_detail">Dummy Name</string>
+    <string name="user_name_detail">Username</string>
+    <string name="arrowToDetail">Arrow</string>
+    <string name="followers_tab">Followers</string>
+    <string name="following_tab">Following</string>
+    <string name="company_detail">Company</string>
+    <string name="location_detail">Location</string>
+    <string name="search_hint">Insert a username</string>
+    <string name="favorite">Favorite</string>
+    <string name="settings">Settings</string>
+    <string name="reminder">Reminder at 9.00 AM</string>
+    <string name="key_reminder">KEY_REMINDER</string>
+    <string name="reminder_summary">Set a reminder at 9.00 AM</string>
+</resources>

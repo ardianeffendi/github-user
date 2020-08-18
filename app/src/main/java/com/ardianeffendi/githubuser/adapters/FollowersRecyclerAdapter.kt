@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.ardianeffendi.githubuser.R
 import com.ardianeffendi.githubuser.models.FollowersResponseItem
+import com.ardianeffendi.githubuser.models.UsersItem
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import kotlinx.android.synthetic.main.item_row_user.view.*
@@ -57,7 +58,16 @@ class FollowersRecyclerAdapter : RecyclerView.Adapter<FollowersRecyclerAdapter.L
                 .apply(RequestOptions().override(55, 55))
                 .into(img_item_avatar)
             tv_name.text = user.login
+            setOnClickListener {
+                onItemClickListener?.let { it(user) }
+            }
         }
+    }
+
+    private var onItemClickListener: ((FollowersResponseItem) -> Unit)? = null
+
+    fun setOnItemClickListener(listener: (FollowersResponseItem) -> Unit) {
+        onItemClickListener = listener
     }
 
 }

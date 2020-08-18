@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +15,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ardianeffendi.githubuser.R
 import com.ardianeffendi.githubuser.adapters.MainRecyclerAdapter
+import com.ardianeffendi.githubuser.db.FavoriteUsersDatabase
 import com.ardianeffendi.githubuser.repository.UsersRepository
 import com.ardianeffendi.githubuser.utils.Resource
 import com.ardianeffendi.githubuser.viewmodels.MainViewModel
@@ -23,9 +25,8 @@ import kotlinx.android.synthetic.main.activity_main.*
 class MainActivity : AppCompatActivity() {
 
     lateinit var viewModel: MainViewModel
-    lateinit var mainRecyclerAdapter: MainRecyclerAdapter
+    private lateinit var mainRecyclerAdapter: MainRecyclerAdapter
 
-    private val TAG = "MainActivity"
     private val titleMain = "GitHub Users"
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,7 +34,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         supportActionBar?.title = titleMain
 
-        val repository = UsersRepository()
+        val repository = UsersRepository(FavoriteUsersDatabase(this))
         val viewModelProviderFactory = MainViewModelProviderFactory(application, repository)
         viewModel = ViewModelProvider(this, viewModelProviderFactory).get(MainViewModel::class.java)
 
@@ -87,6 +88,22 @@ class MainActivity : AppCompatActivity() {
         return true
     }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+           R.id.favorite_page -> {
+                val favIntent = Intent(this, FavoriteActivity::class.java)
+                startActivity(favIntent)
+                return true
+            }
+            R.id.setting -> {
+                val settingsIntent = Intent(this, SettingsActivity::class.java)
+                startActivity(settingsIntent)
+                return true
+            }
+            else -> return true
+        }
+    }
+
     private fun setupRecyclerView() {
         rv_users.setHasFixedSize(true)
         mainRecyclerAdapter = MainRecyclerAdapter()
@@ -97,7 +114,8 @@ class MainActivity : AppCompatActivity() {
         }
         mainRecyclerAdapter.setOnItemClickListener {
             val moveUserDetail = Intent(this@MainActivity, DetailActivity::class.java)
-            moveUserDetail.putExtra(DetailActivity.EXTRA_DATA, it)
+            moveUserDetail.putExtra(DetailActivity.EXTRA_DATA, it.login)
+            moveUserDetail.putExtra(DetailActivity.EXTRA_ID, it.id)
             startActivity(moveUserDetail)
         }
     }
@@ -108,5 +126,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun hideProgressBar() {
         progressBar.visibility = View.INVISIBLE
+    }
+
+    override fun onBackPressed() {
+        val intent = Intent(Intent.ACTION_MAIN)
+        intent.addCategory(Intent.CATEGORY_HOME)
+        intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        startActivity(intent)
     }
 }

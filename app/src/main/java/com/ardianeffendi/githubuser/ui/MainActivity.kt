@@ -122,10 +122,12 @@ class MainActivity : AppCompatActivity() {
 
     private fun showProgressBar() {
         progressBar.visibility = View.VISIBLE
+        main_search.visibility = View.VISIBLE
     }
 
     private fun hideProgressBar() {
         progressBar.visibility = View.INVISIBLE
+        main_search.visibility = View.INVISIBLE
     }
 
     override fun onBackPressed() {

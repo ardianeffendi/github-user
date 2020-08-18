@@ -1,24 +1,21 @@
 package com.ardianeffendi.githubuser.ui
 
+import android.content.ContentValues
 import android.content.Intent
 import android.database.ContentObserver
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.HandlerThread
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.ardianeffendi.githubuser.R
 import com.ardianeffendi.githubuser.adapters.FavoriteRecyclerAdapter
 import com.ardianeffendi.githubuser.db.DBContract.Companion.CONTENT_URI
-import com.ardianeffendi.githubuser.db.FavoriteUsersDatabase
 import com.ardianeffendi.githubuser.helper.MappingHelper
-import com.ardianeffendi.githubuser.repository.UsersRepository
-import com.ardianeffendi.githubuser.viewmodels.DetailViewModel
-import com.ardianeffendi.githubuser.viewmodels.factory.DetailViewModelProviderFactory
+import com.ardianeffendi.githubuser.models.FavoriteUsers
 import com.google.android.material.snackbar.Snackbar
 import kotlinx.android.synthetic.main.activity_favorite.*
 import kotlinx.coroutines.Dispatchers
@@ -28,10 +25,11 @@ import kotlinx.coroutines.launch
 
 class FavoriteActivity : AppCompatActivity() {
 
-    lateinit var viewModel: DetailViewModel
     lateinit var favoriteRecyclerAdapter: FavoriteRecyclerAdapter
 
     private val titleFavorite = "Favorites"
+    private var favoriteUsers: FavoriteUsers? = null
+    private lateinit var uriWithId: Uri
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,45 +40,7 @@ class FavoriteActivity : AppCompatActivity() {
         actionBar?.title = titleFavorite
         actionBar?.setDisplayHomeAsUpEnabled(true)
 
-        val repo = UsersRepository(FavoriteUsersDatabase(this))
-        val favoriteViewModelFactory = DetailViewModelProviderFactory(repo)
-        viewModel =
-            ViewModelProvider(this, favoriteViewModelFactory).get(DetailViewModel::class.java)
-
         setupRecyclerView()
-
-        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
-            ItemTouchHelper.UP or ItemTouchHelper.DOWN,
-            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
-        ) {
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean {
-                return true
-            }
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val position = viewHolder.adapterPosition
-                val user = favoriteRecyclerAdapter.differ.currentList[position]
-                viewModel.deleteUser(user)
-                Snackbar.make(
-                    constraint_layout_favorite,
-                    "User has been removed!",
-                    Snackbar.LENGTH_LONG
-                ).apply {
-                    setAction("Undo") {
-                        viewModel.saveUser(user)
-                    }
-                    show()
-                }
-            }
-        }
-
-        ItemTouchHelper(itemTouchHelperCallback).apply {
-            attachToRecyclerView(rv_favorite)
-        }
 
         val handlerThread = HandlerThread("DataObserver")
         handlerThread.start()
@@ -98,9 +58,48 @@ class FavoriteActivity : AppCompatActivity() {
             loadFavoritesAsync()
         }
 
-//        viewModel.getFavUsers().observe(this, Observer { users ->
-//            favoriteRecyclerAdapter.differ.submitList(users)
-//        })
+        val itemTouchHelperCallback = object : ItemTouchHelper.SimpleCallback(
+            ItemTouchHelper.UP or ItemTouchHelper.DOWN,
+            ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+        ) {
+            override fun onMove(
+                recyclerView: RecyclerView,
+                viewHolder: RecyclerView.ViewHolder,
+                target: RecyclerView.ViewHolder
+            ): Boolean {
+                return true
+            }
+
+            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                val position = viewHolder.adapterPosition
+                val user = favoriteRecyclerAdapter.differ.currentList[position]
+                uriWithId = Uri.parse("$CONTENT_URI/${user.id}")
+                favoriteUsers =
+                    FavoriteUsers(user.id, user.login, user.name, user.avatar_url)
+                GlobalScope.launch {
+                    contentResolver.delete(uriWithId, null, null)
+                    Snackbar.make(
+                        constraint_layout_favorite,
+                        "User has been removed!",
+                        Snackbar.LENGTH_LONG
+                    ).apply {
+                        setAction("Undo") {
+                            val values = ContentValues()
+                            values.put("id", favoriteUsers!!.id)
+                            values.put("username", favoriteUsers!!.login)
+                            values.put("name", favoriteUsers!!.name)
+                            values.put("avatar", favoriteUsers!!.avatar_url)
+                            contentResolver.insert(CONTENT_URI, values)
+                        }
+                        show()
+                    }
+                }
+            }
+        }
+
+        ItemTouchHelper(itemTouchHelperCallback).apply {
+            attachToRecyclerView(rv_favorite)
+        }
 
     }
 
@@ -120,16 +119,12 @@ class FavoriteActivity : AppCompatActivity() {
 
     fun loadFavoritesAsync() {
         GlobalScope.launch(Dispatchers.Main) {
-//            showProgressBar()
             val deferredFavorites = async(Dispatchers.IO) {
                 val cursor = contentResolver?.query(CONTENT_URI, null, null, null, null)
                 MappingHelper.mapCursorToArrayList(cursor)
             }
             val favorites = deferredFavorites.await()
-//            hideProgressBar()
             if (favorites.size > 0) {
-                // TODO: Delete LOG
-                Log.d("loadFavoriteAsync", "Problem ----> $favorites")
                 favoriteRecyclerAdapter.differ.submitList(favorites)
             } else {
                 favoriteRecyclerAdapter.differ.submitList(ArrayList())
@@ -137,14 +132,6 @@ class FavoriteActivity : AppCompatActivity() {
             }
         }
     }
-
-//    private fun showProgressBar() {
-//        progressBar.visibility = View.VISIBLE
-//    }
-//
-//    private fun hideProgressBar() {
-//        progressBar.visibility = View.INVISIBLE
-//    }
 
 }
 

@@ -32,13 +32,13 @@ object MappingHelper {
         var favorite = FavoriteUsers()
         userCursor?.apply {
             if (userCursor.moveToFirst()) {
-                val id = userCursor.getInt(0)
-                val username = userCursor.getString(1)
+                val id = CursorUtil.getColumnIndexOrThrow(userCursor, "id")
+                val username = CursorUtil.getColumnIndexOrThrow(userCursor, "username")
                 val name = CursorUtil.getColumnIndexOrThrow(userCursor, "name")
                 val avatar = CursorUtil.getColumnIndexOrThrow(userCursor, "avatar")
                 favorite = FavoriteUsers(
-                    id,
-                    username,
+                    userCursor.getInt(id),
+                    userCursor.getString(username),
                     userCursor.getString(name),
                     userCursor.getString(avatar)
                 )

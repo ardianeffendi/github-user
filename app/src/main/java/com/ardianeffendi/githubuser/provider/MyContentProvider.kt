@@ -6,7 +6,6 @@ import android.content.ContentValues
 import android.content.UriMatcher
 import android.database.Cursor
 import android.net.Uri
-import android.util.Log
 import com.ardianeffendi.githubuser.db.DBContract
 import com.ardianeffendi.githubuser.db.DBContract.Companion.CONTENT_URI
 import com.ardianeffendi.githubuser.db.FavoriteUsersDatabase
@@ -46,10 +45,12 @@ class MyContentProvider : ContentProvider() {
     override fun delete(uri: Uri, selection: String?, selectionArgs: Array<String>?): Int {
         val context = context ?: return 0
         val favDao = FavoriteUsersDatabase.invoke(context).getFavUsersDao()
-        return when (USER_ID) {
+        val deleted: Int = when (USER_ID) {
             sUriMatcher.match(uri) -> favDao.deleteFavoriteCursor(uri.lastPathSegment.toString())
             else -> 0
         }
+        context.contentResolver.notifyChange(CONTENT_URI, null)
+        return deleted
     }
 
     override fun getType(uri: Uri): String? {
@@ -63,6 +64,7 @@ class MyContentProvider : ContentProvider() {
             sUriMatcher.match(uri) -> favDao.insertFavoriteCursor(fromContentValues(values!!))
             else -> 0
         }
+        context.contentResolver.notifyChange(CONTENT_URI, null)
         return Uri.parse("$CONTENT_URI/$added")
     }
 
@@ -78,18 +80,6 @@ class MyContentProvider : ContentProvider() {
             USER_ID -> favDao.getFavoritesByIdCursor(uri.lastPathSegment!!.toString())
             else -> null
         }
-
-        // TODO: Delete line below, fun Query
-        var id: Int? = null
-        var name: String? = null
-        if (cursor != null && cursor.moveToFirst()) {
-            cursor.apply {
-                id = getInt(getColumnIndexOrThrow("id"))
-                name = getString(getColumnIndexOrThrow("username"))
-            }
-        }
-        Log.d("MyContentProvider", "Cursor => $id, $name")
-
         return cursor
     }
 

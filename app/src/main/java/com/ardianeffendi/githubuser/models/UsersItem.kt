@@ -1,8 +1,5 @@
 package com.ardianeffendi.githubuser.models
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
-
 data class UsersItem(
     val avatar_url: String,
     val events_url: String,

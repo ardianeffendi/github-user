@@ -1,7 +1,7 @@
 package com.ardianeffendi.githubuser.ui
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import androidx.appcompat.app.AppCompatActivity
 import com.ardianeffendi.githubuser.R
 import com.ardianeffendi.githubuser.ui.fragments.MySettingFragment
 

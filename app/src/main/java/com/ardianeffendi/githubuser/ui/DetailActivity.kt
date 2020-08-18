@@ -38,8 +38,8 @@ class DetailActivity : AppCompatActivity() {
 
     private val detailTitle = "Profile"
     private lateinit var uriWithId: Uri
-    private var isFavoriteUsers: Boolean = false
     private var favoriteUsers: FavoriteUsers? = null
+    private var isFavoriteUsers: Boolean = false
 
     companion object {
         const val EXTRA_DATA = "extra_data"
@@ -112,7 +112,6 @@ class DetailActivity : AppCompatActivity() {
         })
 
         // check if current user has been added to favorite
-        // TODO: check this function's parameter!
         checkUserExists(userID)
 
         fab.setOnClickListener {
@@ -120,101 +119,38 @@ class DetailActivity : AppCompatActivity() {
                 when (user) {
                     is Resource.Success -> {
                         user.data?.let {
-                            GlobalScope.launch(Dispatchers.Main) {
-                                async(Dispatchers.IO) {
-                                    if (isFavoriteUsers) {
-                                        contentResolver.delete(uriWithId, null, null)
-                                        Snackbar.make(
-                                            constraint_layout_detail,
-                                            "User removed from favorite!",
-                                            Snackbar.LENGTH_SHORT
-                                        ).show()
-                                        isFavoriteUsers = false
-                                        setStatusFavorite()
-                                    } else {
-                                        val values = ContentValues()
-                                        values.put("id", it.id)
-                                        values.put("username", it.login)
-                                        values.put("name", it.name)
-                                        values.put("avatar", it.avatar_url)
-                                        contentResolver.insert(CONTENT_URI, values)
-                                        Snackbar.make(
-                                            constraint_layout_detail,
-                                            "User added to favorite!",
-                                            Snackbar.LENGTH_SHORT
-                                        ).show()
-                                        isFavoriteUsers = true
-                                        setStatusFavorite()
-                                    }
+                            if (isFavoriteUsers) {
+                                Snackbar.make(
+                                    constraint_layout_detail,
+                                    "User is already in the list!",
+                                    Snackbar.LENGTH_SHORT
+                                ).show()
+                            } else {
+                                val values = ContentValues()
+                                values.put("id", it.id)
+                                values.put("username", it.login)
+                                values.put("name", it.name)
+                                values.put("avatar", it.avatar_url)
+                                GlobalScope.launch {
+                                    contentResolver.insert(CONTENT_URI, values)
+                                    Snackbar.make(
+                                        constraint_layout_detail,
+                                        "User added to favorite!",
+                                        Snackbar.LENGTH_SHORT
+                                    ).show()
+                                    isFavoriteUsers = true
+                                    setStatusFavorite()
                                 }
                             }
                         }
                     }
                 }
             })
-
-
-            // TODO: LiveData Implementation of get Favorite Users
-//            detailViewModel.detailUser.observe(this, Observer { response ->
-//                when (response) {
-//                    is Resource.Success -> {
-//                        response.data?.let { detailUserResponse ->
-//                            favoriteUsers = FavoriteUsers(
-//                                detailUserResponse.id,
-//                                detailUserResponse.login,
-//                                detailUserResponse.name,
-//                                detailUserResponse.avatar_url
-//                            )
-//                            if (!isFavoriteUsers) {
-//                                detailViewModel.saveUser(favoriteUsers!!)
-//                                setStatusFavorite()
-//                                Snackbar.make(
-//                                    constraint_layout_detail,
-//                                    "User added as favorite!",
-//                                    Snackbar.LENGTH_SHORT
-//                                ).show()
-//                            } else {
-//                                detailViewModel.deleteUser(favoriteUsers!!)
-//                                setStatusFavorite()
-//                                Snackbar.make(
-//                                    constraint_layout_detail,
-//                                    "User removed from favorite!",
-//                                    Snackbar.LENGTH_SHORT
-//                                ).show()
-//                            }
-//                        }
-//                    }
-//                    is Resource.Error -> {
-//                        response.message?.let { message ->
-//                            Toast.makeText(
-//                                this,
-//                                "Cannot retrieve user!, $message",
-//                                Toast.LENGTH_LONG
-//                            ).show()
-//                        }
-//                    }
-//                }
-//            })
         }
 
     }
 
     private fun checkUserExists(id: Int) {
-        // TODO: Checking User exists with LiveData
-//        detailViewModel.getCertainUser(id).observe(this, Observer { currentID ->
-//            if (currentID.isNotEmpty()) {
-//                val userExists = currentID[0].id == id
-//                if (userExists) {
-//                    isFavoriteUsers = true
-//                    setStatusFavorite()
-//                    uriWithId = Uri.parse()
-//                } else {
-//                    isFavoriteUsers = false
-//                    setStatusFavorite()
-//
-//                }
-//            }
-//        })
         uriWithId = Uri.parse("$CONTENT_URI/$id")
         GlobalScope.launch(Dispatchers.Main) {
             val deferredFavorites = async(Dispatchers.IO) {

@@ -57,7 +57,16 @@ class FollowersRecyclerAdapter : RecyclerView.Adapter<FollowersRecyclerAdapter.L
                 .apply(RequestOptions().override(55, 55))
                 .into(img_item_avatar)
             tv_name.text = user.login
+            setOnClickListener {
+                onItemClickListener?.let { it(user) }
+            }
         }
+    }
+
+    private var onItemClickListener: ((FollowersResponseItem) -> Unit)? = null
+
+    fun setOnItemClickListener(listener: (FollowersResponseItem) -> Unit) {
+        onItemClickListener = listener
     }
 
 }

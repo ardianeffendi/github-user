@@ -1,5 +1,6 @@
 package com.ardianeffendi.githubuser.ui.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -69,6 +70,13 @@ class FollowingFragment : Fragment(R.layout.fragment_following) {
         val username = arguments?.getString(ARG_USERNAME)
         if (username != null) {
             viewModel.getListFollowing(username)
+        }
+
+        followingRecyclerAdapter.setOnItemClickListener {
+            val moveUserDetail = Intent(activity, DetailActivity::class.java)
+            moveUserDetail.putExtra(DetailActivity.EXTRA_DATA, it.login)
+            moveUserDetail.putExtra(DetailActivity.EXTRA_ID, it.id)
+            startActivity(moveUserDetail)
         }
     }
 

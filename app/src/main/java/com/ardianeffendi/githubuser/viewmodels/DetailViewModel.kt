@@ -29,4 +29,5 @@ class DetailViewModel(
         }
         return Resource.Error(response.message())
     }
+
 }

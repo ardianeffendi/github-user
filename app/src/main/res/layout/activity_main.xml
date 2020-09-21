@@ -23,6 +23,17 @@
         app:layout_constraintVertical_bias="0.0"
         tools:listitem="@layout/item_row_user" />
 
+    <ImageView
+        android:id="@+id/main_search"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:src="@drawable/ic_search_black_24px"
+        android:contentDescription="@string/search" />
+
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyle"

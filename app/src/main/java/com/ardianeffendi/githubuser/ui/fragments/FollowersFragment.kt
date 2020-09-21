@@ -1,5 +1,6 @@
 package com.ardianeffendi.githubuser.ui.fragments
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -35,6 +36,7 @@ class FollowersFragment : Fragment(R.layout.fragment_followers) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         viewModel = (activity as DetailActivity).followersViewModel
+
         setupRecyclerView()
 
         viewModel.listFollowers.observe(viewLifecycleOwner, Observer { response ->
@@ -69,6 +71,13 @@ class FollowersFragment : Fragment(R.layout.fragment_followers) {
         val username = arguments?.getString(ARG_USERNAME)
         if (username != null) {
             viewModel.getListFollowers(username)
+        }
+
+        followersRecyclerAdapter.setOnItemClickListener {
+            val moveUserDetail = Intent(activity, DetailActivity::class.java)
+            moveUserDetail.putExtra(DetailActivity.EXTRA_DATA, it.login)
+            moveUserDetail.putExtra(DetailActivity.EXTRA_ID, it.id)
+            startActivity(moveUserDetail)
         }
     }
 
